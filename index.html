@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>태희 AI 공부실</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">부모님 공부 관리</p>
+        <h1>태희 AI 공부실</h1>
+        <p class="sidebar-copy">중학교 1학년 학생의 학습 계획과 진도를 한눈에 관리해요.</p>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-page="dashboard">대시보드</button>
+        <button class="nav-btn" data-page="today">오늘 할 일</button>
+        <button class="nav-btn" data-page="math">수학 공부</button>
+        <button class="nav-btn" data-page="english">영어 단어</button>
+        <button class="nav-btn" data-page="mistakes">오답노트</button>
+        <button class="nav-btn" data-page="ebs">EBS 강의 기록</button>
+        <button class="nav-btn" data-page="exam">시험 준비</button>
+        <button class="nav-btn" data-page="report">공부 리포트</button>
+        <button class="nav-btn" data-page="korean-tutor">국어 선생님</button>
+        <button class="nav-btn" data-page="english-tutor">영어 선생님</button>
+        <button class="nav-btn" data-page="math-tutor">수학 선생님</button>
+        <button class="nav-btn" data-page="social-tutor">사회 선생님</button>
+        <button class="nav-btn" data-page="science-tutor">과학 선생님</button>
+        <button class="nav-btn" data-page="homeroom-tutor">담임 학습코치</button>
+        <button class="nav-btn" data-page="concept-library">중1 개념 라이브러리</button>
+        <button class="nav-btn" data-page="photo-question">문제 사진 질문</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>저장 위치</p>
+        <strong>브라우저 localStorage</strong>
+      </div>
+    </aside>
+
+    <main class="content-area">
+      <section id="dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">오늘 공부 요약</p>
+            <h2>오늘의 학습 상태를 한눈에 확인해요</h2>
+          </div>
+          <p class="header-note">샘플 데이터가 기본으로 들어있습니다. 원하는 내용으로 바로 수정할 수 있어요.</p>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card">
+            <p>오늘 할 일</p>
+            <h3 id="todayCount">0개</h3>
+            <span id="todayProgress">0% 완료</span>
+          </article>
+          <article class="summary-card">
+            <p>이번 주 목표</p>
+            <h3 id="weekCount">0개</h3>
+            <span>학습 관리 기준</span>
+          </article>
+          <article class="summary-card">
+            <p>약한 단원</p>
+            <h3 id="weakCount">0개</h3>
+            <span>평가 기준: 이해도 낮음</span>
+          </article>
+          <article class="summary-card">
+            <p>최근 오답</p>
+            <h3 id="mistakeCount">0개</h3>
+            <span>복습이 필요한 항목</span>
+          </article>
+        </div>
+
+        <section class="analysis-dashboard">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">학습 분석 대시보드</p>
+                <h3>주간 학습 패턴과 약한 과목을 한눈에 확인해요</h3>
+              </div>
+              <span class="chip">분석</span>
+            </div>
+
+            <div class="analysis-grid">
+              <article class="panel analytics-card">
+                <div class="panel-header">
+                  <h3>주간 공부 시간</h3>
+                  <span class="chip">이번 주</span>
+                </div>
+                <div id="weeklyStudyChart" class="weekly-study-chart"></div>
+              </article>
+
+              <article class="panel analytics-card">
+                <div class="panel-header">
+                  <h3>과목별 진행도</h3>
+                  <span class="chip">진도</span>
+                </div>
+                <div id="subjectProgressList" class="subject-progress-list"></div>
+              </article>
+
+              <article class="panel analytics-card">
+                <div class="panel-header">
+                  <h3>약한 과목 순위</h3>
+                  <span class="chip">우선순위</span>
+                </div>
+                <div id="weakSubjectList" class="rank-list"></div>
+              </article>
+
+              <article class="panel analytics-card">
+                <div class="panel-header">
+                  <h3>학습 기준</h3>
+                  <span class="chip">오늘</span>
+                </div>
+                <div id="analysisSummaryList" class="summary-list"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="profile-dashboard">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">현재 학습 프로필</p>
+                <h3>중1 학생의 현재 진행 상황과 다음 주 학습 기준을 정리해요</h3>
+              </div>
+              <span class="chip">자동 갱신</span>
+            </div>
+            <div id="currentLearningProfile"></div>
+          </div>
+        </section>
+
+        <div class="dashboard-grid">
+          <article class="panel import-export-panel">
+            <div class="panel-header">
+              <h3>데이터 저장/불러오기</h3>
+              <span class="chip">JSON</span>
+            </div>
+            <p class="import-export-copy">학습 데이터를 JSON 파일로 저장하거나 불러와서 다른 기기와도 이어서 사용할 수 있어요.</p>
+            <div class="import-export-actions">
+              <button id="exportDataBtn" class="primary-btn">JSON 내보내기</button>
+              <label class="secondary-btn file-input-label">
+                JSON 불러오기
+                <input type="file" id="importDataInput" accept=".json,application/json" hidden />
+              </label>
+            </div>
+            <p id="importExportStatus" class="memo-preview">현재 저장된 내용을 내려받거나 불러올 수 있어요.</p>
+          </article>
+          <article class="panel">
+            <div class="panel-header">
+              <h3>이번 주 해야 할 일</h3>
+              <span class="chip">계획</span>
+            </div>
+            <div id="weekTodoList" class="list-stack"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h3>약한 단원 표시</h3>
+              <span class="chip">주목</span>
+            </div>
+            <div id="weakAreaList" class="list-stack"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h3>최근 오답 표시</h3>
+              <span class="chip">복습</span>
+            </div>
+            <div id="recentMistakesList" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="today" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">오늘 할 일</p>
+            <h2>오늘의 학습 과제를 정리해요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="todayForm" class="panel form-panel">
+            <h3>새 할 일 추가</h3>
+            <div class="field-grid">
+              <label>과목
+                <input type="text" id="todoSubject" placeholder="예: 수학" required />
+              </label>
+              <label>할 일
+                <input type="text" id="todoTask" placeholder="예: 분수 문제 10개 풀기" required />
+              </label>
+              <label class="full-width">메모
+                <textarea id="todoMemo" rows="4" placeholder="예: 계산 실수 점검"></textarea>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>오늘의 목록</h3>
+              <span class="chip">체크 가능</span>
+            </div>
+            <div id="todayList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="math" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">수학 공부</p>
+            <h2>단원별 이해도와 보완 내용을 기록해요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="mathForm" class="panel form-panel">
+            <h3>수학 기록 추가</h3>
+            <div class="field-grid">
+              <label>단원명
+                <input type="text" id="mathTopic" placeholder="예: 소수의 덧셈과 뺄셈" required />
+              </label>
+              <label>이해도
+                <select id="mathLevel">
+                  <option value="낮음">낮음</option>
+                  <option value="보통">보통</option>
+                  <option value="좋음">좋음</option>
+                </select>
+              </label>
+              <label>틀린 문제 수
+                <input type="number" id="mathWrong" min="0" value="0" />
+              </label>
+              <label class="full-width">보완 메모
+                <textarea id="mathMemo" rows="4" placeholder="예: 자리 맞추기 연습 필요"></textarea>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>수학 기록</h3>
+              <span class="chip">진도 관리</span>
+            </div>
+            <div id="mathList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="english" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">영어 단어</p>
+            <h2>단어 시험 결과와 점수를 간단히 기록해요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="englishForm" class="panel form-panel">
+            <h3>영어 단어 기록</h3>
+            <div class="field-grid">
+              <label>날짜
+                <input type="date" id="englishDate" required />
+              </label>
+              <label>총 문항 수
+                <input type="number" id="englishTotal" min="1" value="20" required />
+              </label>
+              <label>맞은 개수
+                <input type="number" id="englishCorrect" min="0" value="15" required />
+              </label>
+              <label class="full-width">틀린 단어 메모
+                <textarea id="englishMemo" rows="4" placeholder="예: family, weather, because"></textarea>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>영어 기록</h3>
+              <span class="chip">자동 점수 계산</span>
+            </div>
+            <div id="englishList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mistakes" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">오답노트</p>
+            <h2>틀린 문제를 다시 보고 복습 계획을 세워요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="mistakeForm" class="panel form-panel">
+            <h3>오답 기록 추가</h3>
+            <div class="field-grid">
+              <label>과목
+                <input type="text" id="mistakeSubject" placeholder="예: 수학" required />
+              </label>
+              <label>단원
+                <input type="text" id="mistakeUnit" placeholder="예: 분수" required />
+              </label>
+              <label class="full-width">틀린 이유
+                <textarea id="mistakeReason" rows="4" placeholder="예: 계산 순서를 헷갈림" required></textarea>
+              </label>
+              <label>다시 풀기 여부
+                <select id="mistakeRetry">
+                  <option value="필요">필요</option>
+                  <option value="보류">보류</option>
+                  <option value="완료">완료</option>
+                </select>
+              </label>
+              <label class="full-width">부모 메모
+                <textarea id="mistakeParentMemo" rows="4" placeholder="예: 짧게 복습하고 다시 풀기"></textarea>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>오답노트</h3>
+              <span class="chip">복습 체크</span>
+            </div>
+            <div id="mistakeList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ebs" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">EBS 강의 기록</p>
+            <h2>강의 수강 여부와 이해도를 기록해요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="ebsForm" class="panel form-panel">
+            <h3>EBS 강의 기록 추가</h3>
+            <div class="field-grid">
+              <label>과목
+                <input type="text" id="ebsSubject" placeholder="예: 영어" required />
+              </label>
+              <label>강의명
+                <input type="text" id="ebsTitle" placeholder="예: 중학 영어 1-1 문법" required />
+              </label>
+              <label>수강 여부
+                <select id="ebsWatched">
+                  <option value="수강함">수강함</option>
+                  <option value="미수강">미수강</option>
+                </select>
+              </label>
+              <label>이해도
+                <select id="ebsLevel">
+                  <option value="낮음">낮음</option>
+                  <option value="보통">보통</option>
+                  <option value="좋음">좋음</option>
+                </select>
+              </label>
+              <label>복습 필요 여부
+                <select id="ebsReview">
+                  <option value="필요">필요</option>
+                  <option value="보류">보류</option>
+                  <option value="완료">완료</option>
+                </select>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>EBS 기록</h3>
+              <span class="chip">강의 관리</span>
+            </div>
+            <div id="ebsList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="exam" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">시험 준비</p>
+            <h2>시험 일정과 준비 과목을 정리해요</h2>
+          </div>
+        </div>
+
+        <div class="two-column-layout">
+          <form id="examForm" class="panel form-panel">
+            <h3>시험 정보 추가</h3>
+            <div class="field-grid">
+              <label>시험명
+                <input type="text" id="examName" placeholder="예: 1학기 중간고사" required />
+              </label>
+              <label>시험일
+                <input type="date" id="examDate" required />
+              </label>
+              <label>준비 과목
+                <input type="text" id="examSubjects" placeholder="예: 수학, 영어" required />
+              </label>
+              <label>우선순위
+                <select id="examPriority">
+                  <option value="높음">높음</option>
+                  <option value="보통">보통</option>
+                  <option value="낮음">낮음</option>
+                </select>
+              </label>
+            </div>
+            <button type="submit" class="primary-btn">저장하기</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>시험 일정</h3>
+              <span class="chip">남은 날짜</span>
+            </div>
+            <div id="examList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="report" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">공부 리포트</p>
+            <h2>이번 주를 돌아보고 다음 주 계획을 세워요</h2>
+          </div>
+        </div>
+
+        <div class="panel form-panel">
+          <h3>이번 주 공부 리포트</h3>
+          <div class="field-grid">
+            <label class="full-width">이번 주 공부 요약
+              <textarea id="reportSummary" rows="4" placeholder="예: 수학 기초 문제를 꾸준히 풀고 단어를 10개씩 암기함"></textarea>
+            </label>
+            <label class="full-width">잘한 점
+              <textarea id="reportStrengths" rows="4" placeholder="예: 과제 제출을 꾸준히 했음"></textarea>
+            </label>
+            <label class="full-width">보완할 점
+              <textarea id="reportImprovements" rows="4" placeholder="예: 계산 실수와 시간 관리"></textarea>
+            </label>
+            <label class="full-width">다음 주 추천 계획
+              <textarea id="reportNextPlan" rows="4" placeholder="예: 수학 심화 2문제, 영어 단어 15개 복습"></textarea>
+            </label>
+          </div>
+          <button id="saveReportBtn" class="primary-btn">저장하기</button>
+          <div id="reportPreview" class="report-preview"></div>
+        </div>
+      </section>
+
+      <section id="meeting-room" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">AI 선생님 회의실</p>
+            <h2>현재 학습 데이터를 읽어, 선생님들이 함께 의견을 나누고 주간 계획을 제안해요</h2>
+          </div>
+          <p class="header-note">회의를 생성하면 저장된 이력이 localStorage에 남아 다시 확인할 수 있어요.</p>
+        </div>
+
+        <div class="meeting-room-actions">
+          <button id="meetingGenerateBtn" class="primary-btn">회의 생성</button>
+        </div>
+
+        <p id="meetingStatus" class="tutor-status">회의를 만들면 현재 학습 상태를 기준으로 선생님들의 의견이 정리됩니다.</p>
+
+        <div class="meeting-summary-grid">
+          <article class="panel meeting-summary-card">
+            <div class="panel-header">
+              <h3>강점</h3>
+              <span class="chip">잘한 점</span>
+            </div>
+            <div id="meetingStrengths" class="meeting-pill-list"></div>
+          </article>
+
+          <article class="panel meeting-summary-card">
+            <div class="panel-header">
+              <h3>약점</h3>
+              <span class="chip">보완 포인트</span>
+            </div>
+            <div id="meetingWeaknesses" class="meeting-pill-list"></div>
+          </article>
+
+          <article class="panel meeting-summary-card">
+            <div class="panel-header">
+              <h3>예상 개선</h3>
+              <span class="chip">기대 효과</span>
+            </div>
+            <p id="meetingImprovement" class="meeting-summary-copy"></p>
+          </article>
+        </div>
+
+        <div class="meeting-bubble-grid">
+          <article class="panel meeting-bubble-panel">
+            <div class="panel-header">
+              <h3>국어 선생님</h3>
+              <span class="chip">말풍선</span>
+            </div>
+            <div class="meeting-bubble teacher-bubble">
+              <p id="meetingKoreanOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+
+          <article class="panel meeting-bubble-panel">
+            <div class="panel-header">
+              <h3>영어 선생님</h3>
+              <span class="chip">말풍선</span>
+            </div>
+            <div class="meeting-bubble teacher-bubble">
+              <p id="meetingEnglishOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+
+          <article class="panel meeting-bubble-panel">
+            <div class="panel-header">
+              <h3>수학 선생님</h3>
+              <span class="chip">말풍선</span>
+            </div>
+            <div class="meeting-bubble teacher-bubble">
+              <p id="meetingMathOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+
+          <article class="panel meeting-bubble-panel">
+            <div class="panel-header">
+              <h3>사회 선생님</h3>
+              <span class="chip">말풍선</span>
+            </div>
+            <div class="meeting-bubble teacher-bubble">
+              <p id="meetingSocialOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+
+          <article class="panel meeting-bubble-panel">
+            <div class="panel-header">
+              <h3>과학 선생님</h3>
+              <span class="chip">말풍선</span>
+            </div>
+            <div class="meeting-bubble teacher-bubble">
+              <p id="meetingScienceOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+
+          <article class="panel meeting-bubble-panel coach-bubble-panel">
+            <div class="panel-header">
+              <h3>학습 코치</h3>
+              <span class="chip">총괄</span>
+            </div>
+            <div class="meeting-bubble coach-bubble">
+              <p id="meetingCoachOpinion" class="meeting-bubble-copy"></p>
+            </div>
+          </article>
+        </div>
+
+        <div class="meeting-plan-grid">
+          <article class="panel">
+            <div class="panel-header">
+              <h3>주간 공부 계획</h3>
+              <span class="chip">회의 결과</span>
+            </div>
+            <div id="meetingPlanList" class="meeting-plan-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h3>회의 기록</h3>
+              <span class="chip">localStorage</span>
+            </div>
+            <div id="meetingHistoryList" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="concept-library" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">중1 개념 라이브러리</p>
+            <h2>과목별 개념창고와 체크 문제를 한눈에 정리해요</h2>
+          </div>
+          <p class="header-note">검색으로 단원을 찾고, 관심 개념을 찜하거나 오답노트와 연결할 수 있어요.</p>
+        </div>
+
+        <div class="panel concept-search-panel">
+          <div class="concept-search-row">
+            <input id="conceptSearchInput" type="search" placeholder="예: 일차방정식, 중심 내용, be동사" />
+            <button id="conceptSearchBtn" class="primary-btn">개념 검색</button>
+          </div>
+          <p id="conceptSearchStatus" class="tutor-status">키워드를 입력하면 관련 단원과 연습 문제를 바로 확인할 수 있어요.</p>
+          <div id="conceptSearchResults" class="concept-search-results"></div>
+        </div>
+
+        <div id="conceptLibraryGrid" class="concept-library-grid"></div>
+
+        <div class="panel concept-favorites-panel">
+          <div class="panel-header">
+            <h3>찜한 개념</h3>
+            <span class="chip">localStorage</span>
+          </div>
+          <div id="favoriteConceptList" class="list-stack"></div>
+        </div>
+      </section>
+
+      <section id="photo-question" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">문제 사진 질문</p>
+            <h2>문제 사진을 올리고, 선생님처럼 힌트 또는 풀이를 받아보세요</h2>
+          </div>
+          <p class="header-note">문제 사진에 이름, 학교명, 연락처가 보이면 가리고 올려 주세요.</p>
+        </div>
+
+        <div class="photo-layout">
+          <article class="panel photo-form-panel">
+            <div class="panel-header">
+              <h3>문제 사진 업로드</h3>
+              <span class="chip">AI 선생님</span>
+            </div>
+
+            <div class="field-grid photo-form-grid">
+              <label>과목 선택
+                <select id="photoSubjectSelect">
+                  <option value="국어">국어</option>
+                  <option value="영어">영어</option>
+                  <option value="수학">수학</option>
+                  <option value="사회">사회</option>
+                  <option value="과학">과학</option>
+                </select>
+              </label>
+              <label>답변 모드
+                <select id="photoAnswerModeSelect">
+                  <option value="힌트만 보기">힌트만 보기</option>
+                  <option value="단계별 풀이">단계별 풀이</option>
+                  <option value="정답까지 보기">정답까지 보기</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력
+                <textarea id="photoQuestionInput" rows="4" placeholder="예: 이 문제에서 먼저 무엇을 확인해야 하나요?"></textarea>
+              </label>
+              <label class="full-width">문제 사진 업로드
+                <input type="file" id="photoImageInput" accept="image/*" />
+              </label>
+            </div>
+
+            <div class="photo-preview-box">
+              <div class="preview-placeholder" id="photoPreviewPlaceholder">이미지 미리보기가 여기에 표시됩니다.</div>
+              <img id="photoPreviewImage" class="photo-preview-image" alt="업로드된 문제 사진 미리보기" hidden />
+            </div>
+
+            <div class="tutor-actions">
+              <button id="photoGenerateBtn" class="primary-btn">모의 답변 생성</button>
+              <button id="photoSaveBtn" class="secondary-btn">질문/답변 저장</button>
+            </div>
+
+            <p id="photoStatus" class="tutor-status">이미지를 업로드하고 답변을 생성하면 기록이 저장됩니다.</p>
+            <div id="photoAnswerOutput" class="tutor-answer-box"></div>
+            <p class="warning-note">문제 사진에 이름, 학교명, 연락처가 보이면 가리고 올려 주세요.</p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h3>저장된 질문/답변 기록</h3>
+              <span class="chip">localStorage</span>
+            </div>
+            <div id="photoHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="korean-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">국어 선생님</p>
+            <h2>독해, 어휘, 글쓰기 중심의 따뜻한 설명을 받아보세요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">국어</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="koreanSubjectSelect">
+                  <option value="국어">국어</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="koreanGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="koreanDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="koreanQuestionInput" rows="5" placeholder="예: 문단의 중심 생각을 어떻게 찾나요?"></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="koreanFollowUpInput" rows="3" placeholder="예: 글쓰기에서 인상적인 표현을 고르는 팁이 있을까요?"></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="koreanParentMemo" rows="3" placeholder="예: 문해력 복습을 함께 해 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="koreanGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="koreanSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="koreanStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="koreanAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">국어</span>
+            </div>
+            <div id="koreanHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="english-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">영어 선생님</p>
+            <h2>단어, 문법, 독해를 친절하게 설명해 드려요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">영어</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="englishSubjectSelect">
+                  <option value="영어">영어</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="englishGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="englishDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="englishQuestionInput" rows="5" placeholder="예: 현재완료와 과거시제 차이를 알려 주세요."></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="englishFollowUpInput" rows="3" placeholder="예: 짧은 문장으로 외우는 방법이 있나요?"></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="englishParentMemo" rows="3" placeholder="예: 문법 복습을 함께 해 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="englishGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="englishSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="englishStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="englishAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">영어</span>
+            </div>
+            <div id="englishHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="math-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">수학 선생님</p>
+            <h2>중학생 눈높이로 단계별 풀이와 왜 그렇게 되는지 설명해 드려요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">수학</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="mathTutorSubjectSelect">
+                  <option value="수학">수학</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="mathTutorGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="mathTutorDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="mathTutorQuestionInput" rows="5" placeholder="예: 분수의 나눗셈을 어떻게 풀어야 하나요?"></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="mathTutorFollowUpInput" rows="3" placeholder="예: 비례식 문제도 같이 알려 주세요."></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="mathTutorParentMemo" rows="3" placeholder="예: 단계별 풀이를 다시 확인해 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="mathTutorGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="mathTutorSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="mathTutorStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="mathTutorAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">수학</span>
+            </div>
+            <div id="mathTutorHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="social-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">사회 선생님</p>
+            <h2>개념 → 예시 → 암기 포인트 순서로 정리해 드려요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">사회</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="socialSubjectSelect">
+                  <option value="사회">사회</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="socialGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="socialDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="socialQuestionInput" rows="5" placeholder="예: 민주주의와 헌법의 관계를 설명해 주세요."></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="socialFollowUpInput" rows="3" placeholder="예: 시험에 나올 암기 포인트를 정리해 주세요."></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="socialParentMemo" rows="3" placeholder="예: 사회 개념을 짧게 요약해 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="socialGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="socialSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="socialStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="socialAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">사회</span>
+            </div>
+            <div id="socialHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="science-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">과학 선생님</p>
+            <h2>원리 → 생활 예시 → 확인 퀴즈 순으로 이해를 도와드려요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">과학</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="scienceSubjectSelect">
+                  <option value="과학">과학</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="scienceGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="scienceDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="scienceQuestionInput" rows="5" placeholder="예: 물이 끓을 때 기체가 되는 이유가 뭔가요?"></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="scienceFollowUpInput" rows="3" placeholder="예: 생활 속 예시를 더 알려 주세요."></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="scienceParentMemo" rows="3" placeholder="예: 실험 개념을 함께 복습해 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="scienceGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="scienceSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="scienceStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="scienceAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">과학</span>
+            </div>
+            <div id="scienceHistory" class="list-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="homeroom-tutor" class="page">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">담임 학습코치</p>
+            <h2>공부 계획, 습관, 격려, 주간 계획을 함께 정리해 드려요</h2>
+          </div>
+        </div>
+
+        <div class="tutor-layout">
+          <article class="panel tutor-card">
+            <div class="panel-header">
+              <h3>질문하기</h3>
+              <span class="chip">담임</span>
+            </div>
+            <div class="field-grid tutor-form-grid">
+              <label>과목 선택
+                <select id="homeroomSubjectSelect">
+                  <option value="담임 학습코치">담임 학습코치</option>
+                </select>
+              </label>
+              <label>학년 선택
+                <select id="homeroomGradeSelect">
+                  <option value="중1">중1</option>
+                  <option value="중2">중2</option>
+                  <option value="중3">중3</option>
+                </select>
+              </label>
+              <label>난이도 선택
+                <select id="homeroomDifficultySelect">
+                  <option value="쉽게">쉽게</option>
+                  <option value="보통">보통</option>
+                  <option value="자세히">자세히</option>
+                </select>
+              </label>
+              <label class="full-width">질문 입력칸
+                <textarea id="homeroomQuestionInput" rows="5" placeholder="예: 이번 주에 공부 습관을 어떻게 들이면 좋을까요?"></textarea>
+              </label>
+              <label class="full-width">추가 질문 입력칸
+                <textarea id="homeroomFollowUpInput" rows="3" placeholder="예: 오늘 공부 시간을 어떻게 분배하면 좋을까요?"></textarea>
+              </label>
+              <label class="full-width">학부모 메모
+                <textarea id="homeroomParentMemo" rows="3" placeholder="예: 부모님이 함께 챙기면 좋은 부분을 적어 주세요."></textarea>
+              </label>
+            </div>
+            <div class="tutor-actions">
+              <button id="homeroomGenerateBtn" class="primary-btn">답변 생성</button>
+              <button id="homeroomSaveBtn" class="secondary-btn">답변 저장</button>
+            </div>
+            <p id="homeroomStatus" class="tutor-status">답변을 생성하면 히스토리가 저장됩니다.</p>
+            <div id="homeroomAnswerOutput" class="tutor-answer-box"></div>
+          </article>
+
+          <article class="panel tutor-history-panel">
+            <div class="panel-header">
+              <h3>저장된 히스토리</h3>
+              <span class="chip">담임</span>
+            </div>
+            <div id="homeroomHistory" class="list-stack"></div>
+          </article>
+        </div>
+
+        <article class="panel settings-panel">
+          <div class="panel-header">
+            <h3>AI 연결 설정</h3>
+            <span class="chip">미래 연결용</span>
+          </div>
+          <div class="settings-grid">
+            <label>API provider placeholder
+              <select id="apiProviderSelect">
+                <option value="OpenAI">OpenAI</option>
+                <option value="Claude">Claude</option>
+              </select>
+            </label>
+            <label>API key 입력(placeholder only)
+              <input id="apiKeyInput" type="password" placeholder="실제 API 키를 여기에 입력하지 마세요" />
+            </label>
+          </div>
+          <p class="api-warning">실제 API 키는 브라우저에 직접 저장하지 않는 것이 안전합니다. 배포 전에는 서버를 통해 안전하게 연결해야 합니다.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
