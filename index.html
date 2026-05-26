@@ -16,22 +16,11 @@
       </div>
 
       <nav class="nav-links">
-        <button class="nav-btn active" data-page="dashboard">대시보드</button>
-        <button class="nav-btn" data-page="today">오늘 할 일</button>
-        <button class="nav-btn" data-page="math">수학 공부</button>
-        <button class="nav-btn" data-page="english">영어 단어</button>
-        <button class="nav-btn" data-page="mistakes">오답노트</button>
-        <button class="nav-btn" data-page="ebs">EBS 강의 기록</button>
-        <button class="nav-btn" data-page="exam">시험 준비</button>
-        <button class="nav-btn" data-page="report">공부 리포트</button>
-        <button class="nav-btn" data-page="korean-tutor">국어 선생님</button>
-        <button class="nav-btn" data-page="english-tutor">영어 선생님</button>
-        <button class="nav-btn" data-page="math-tutor">수학 선생님</button>
-        <button class="nav-btn" data-page="social-tutor">사회 선생님</button>
-        <button class="nav-btn" data-page="science-tutor">과학 선생님</button>
-        <button class="nav-btn" data-page="homeroom-tutor">담임 학습코치</button>
-        <button class="nav-btn" data-page="concept-library">중1 개념 라이브러리</button>
-        <button class="nav-btn" data-page="photo-question">문제 사진 질문</button>
+        <button class="nav-btn active" data-page="dashboard">홈</button>
+        <button class="nav-btn" data-page="today">오늘 공부 기록</button>
+        <button class="nav-btn" data-page="math">과목별 공부방</button>
+        <button class="nav-btn" data-page="ebs">학원 & 피드백</button>
+        <button class="nav-btn" data-page="meeting-room">AI 선생님 회의실</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -41,6 +30,75 @@
     </aside>
 
     <main class="content-area">
+      <section class="category-quicknav">
+        <div class="category-card active" data-category="home" data-page="dashboard">
+          <div class="category-card-body">
+            <p class="eyebrow">홈</p>
+            <h3>대시보드</h3>
+            <p>학습 요약, 프로필, 데이터 저장/불러오기와 이번 주 계획을 한 번에 확인해요.</p>
+          </div>
+          <div class="category-chip-row">
+            <button type="button" class="category-chip active" data-page="dashboard">대시보드</button>
+          </div>
+        </div>
+
+        <div class="category-card" data-category="today-log" data-page="today">
+          <div class="category-card-body">
+            <p class="eyebrow">오늘 공부 기록</p>
+            <h3>오늘 할 일 & 공부 리포트</h3>
+            <p>오늘의 학습 과제와 한 주를 돌아보는 리포트를 함께 관리해요.</p>
+          </div>
+          <div class="category-chip-row">
+            <button type="button" class="category-chip" data-page="today">오늘 할 일</button>
+            <button type="button" class="category-chip" data-page="report">공부 리포트</button>
+          </div>
+        </div>
+
+        <div class="category-card" data-category="subject-room" data-page="math">
+          <div class="category-card-body">
+            <p class="eyebrow">과목별 공부방</p>
+            <h3>수학 · 영어 · 오답노트 · 시험 준비</h3>
+            <p>각 과목의 기록과 복습 포인트를 깔끔하게 모아 두고 바로 확인해요.</p>
+          </div>
+          <div class="category-chip-row">
+            <button type="button" class="category-chip" data-page="math">수학 공부</button>
+            <button type="button" class="category-chip" data-page="english">영어 단어</button>
+            <button type="button" class="category-chip" data-page="mistakes">오답노트</button>
+            <button type="button" class="category-chip" data-page="exam">시험 준비</button>
+          </div>
+        </div>
+
+        <div class="category-card" data-category="academy-feedback" data-page="ebs">
+          <div class="category-card-body">
+            <p class="eyebrow">학원 & 피드백</p>
+            <h3>EBS 강의 기록</h3>
+            <p>학원과 연결되는 학습 원천을 정리해, 복습 우선순위를 쉽게 잡아줘요.</p>
+          </div>
+          <div class="category-chip-row">
+            <button type="button" class="category-chip" data-page="ebs">EBS 강의 기록</button>
+          </div>
+        </div>
+
+        <div class="category-card" data-category="teacher-meeting" data-page="meeting-room">
+          <div class="category-card-body">
+            <p class="eyebrow">AI 선생님 회의실</p>
+            <h3>선생님과 개념 라이브러리</h3>
+            <p>국어부터 과학까지, AI 선생님과 문제 사진 질문, 개념 라이브러리를 함께 사용해요.</p>
+          </div>
+          <div class="category-chip-row">
+            <button type="button" class="category-chip" data-page="meeting-room">AI 선생님 회의실</button>
+            <button type="button" class="category-chip" data-page="korean-tutor">국어 선생님</button>
+            <button type="button" class="category-chip" data-page="english-tutor">영어 선생님</button>
+            <button type="button" class="category-chip" data-page="math-tutor">수학 선생님</button>
+            <button type="button" class="category-chip" data-page="social-tutor">사회 선생님</button>
+            <button type="button" class="category-chip" data-page="science-tutor">과학 선생님</button>
+            <button type="button" class="category-chip" data-page="homeroom-tutor">담임 학습코치</button>
+            <button type="button" class="category-chip" data-page="concept-library">중1 개념 라이브러리</button>
+            <button type="button" class="category-chip" data-page="photo-question">문제 사진 질문</button>
+          </div>
+        </div>
+      </section>
+
       <section id="dashboard" class="page active">
         <div class="page-header">
           <div>

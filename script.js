@@ -330,6 +330,58 @@ const state = {
 const pages = document.querySelectorAll('.page');
 const navButtons = document.querySelectorAll('.nav-btn');
 
+function getCategoryForPage(pageId) {
+  if (pageId === 'dashboard') {
+    return 'home';
+  }
+
+  if (pageId === 'today' || pageId === 'report') {
+    return 'today-log';
+  }
+
+  if (pageId === 'math' || pageId === 'english' || pageId === 'mistakes' || pageId === 'exam') {
+    return 'subject-room';
+  }
+
+  if (pageId === 'ebs') {
+    return 'academy-feedback';
+  }
+
+  return 'teacher-meeting';
+}
+
+function getSidebarPage(pageId) {
+  if (pageId === 'dashboard') {
+    return 'dashboard';
+  }
+
+  if (pageId === 'today' || pageId === 'report') {
+    return 'today';
+  }
+
+  if (pageId === 'math' || pageId === 'english' || pageId === 'mistakes' || pageId === 'exam') {
+    return 'math';
+  }
+
+  if (pageId === 'ebs') {
+    return 'ebs';
+  }
+
+  return 'meeting-room';
+}
+
+function updateCategoryNavigation(pageId) {
+  const currentCategory = getCategoryForPage(pageId);
+
+  document.querySelectorAll('.category-card').forEach(card => {
+    card.classList.toggle('active', card.dataset.category === currentCategory);
+  });
+
+  document.querySelectorAll('.category-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.page === pageId);
+  });
+}
+
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
@@ -827,7 +879,9 @@ function importStudyData(file) {
 
 function switchPage(pageId) {
   pages.forEach(page => page.classList.toggle('active', page.id === pageId));
-  navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageId));
+  const sidebarPage = getSidebarPage(pageId);
+  navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.page === sidebarPage));
+  updateCategoryNavigation(pageId);
 }
 
 function formatDate(value) {
@@ -1673,6 +1727,17 @@ function init() {
 
 navButtons.forEach(button => {
   button.addEventListener('click', () => switchPage(button.dataset.page));
+});
+
+document.querySelectorAll('.category-card').forEach(card => {
+  card.addEventListener('click', () => switchPage(card.dataset.page));
+});
+
+document.querySelectorAll('.category-chip').forEach(chip => {
+  chip.addEventListener('click', (event) => {
+    event.stopPropagation();
+    switchPage(chip.dataset.page);
+  });
 });
 
 init();
