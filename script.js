@@ -284,6 +284,8 @@ const defaultAnalytics = {
   todayGoal: '30분 복습 + 오답 2개 다시 풀기'
 };
 
+const todayDateValue = new Date().toISOString().slice(0, 10);
+
 const sampleData = {
   todos: [
     { id: crypto.randomUUID(), subject: '수학', task: '분수 문제 5개 풀기', memo: '계산 순서 다시 확인', done: false },
@@ -302,7 +304,31 @@ const sampleData = {
     { id: crypto.randomUUID(), subject: '영어', unit: '문법', reason: 'be 동사 위치 혼동', retry: '보류', parentMemo: '예문 다시 읽기' }
   ],
   ebs: [
-    { id: crypto.randomUUID(), subject: '수학', title: '중학 수학 1-1 기본 개념', watched: '수강함', level: '보통', review: '필요' }
+    {
+      id: crypto.randomUUID(),
+      date: todayDateValue,
+      readingFeedback: '독해에서 핵심 문장을 찾는 연습이 필요해요.',
+      englishFeedback: '영어 문장 구조를 짧게 반복하면 좋겠어요.',
+      mathFeedback: '계산 과정을 한 번 더 적어 보도록 해요.',
+      testScore: '85점',
+      homeworkMemo: '수학 5문제, 영어 단어 10개 복습',
+      parentMemo: '작은 목표를 나눠서 마무리하기'
+    }
+  ],
+  dailyRecords: [
+    {
+      id: crypto.randomUUID(),
+      date: todayDateValue,
+      math: '분수 5문제 풀기',
+      english: '단어 10개 암기',
+      social: '지도 읽기 복습',
+      science: '물질의 상태 변화 정리',
+      korean: '독해 1지문 요약',
+      todayStruggle: '분수 계산 순서를 헷갈렸어요.',
+      tomorrowPlan: '분수 문제 3개 다시 풀기',
+      parentMemo: '한 번에 완벽하게 하려 하지 말고 단계별로 해보기',
+      createdAt: new Date().toLocaleString('ko-KR')
+    }
   ],
   exams: [
     { id: crypto.randomUUID(), name: '1학기 중간고사', date: '2026-06-10', subjects: '수학, 영어', priority: '높음' }
@@ -322,6 +348,7 @@ const state = {
   english: [],
   mistakes: [],
   ebs: [],
+  dailyRecords: [],
   exams: [],
   report: {},
   analytics: { ...defaultAnalytics }
@@ -371,10 +398,8 @@ function getSidebarPage(pageId) {
 }
 
 function updateCategoryNavigation(pageId) {
-  const currentCategory = getCategoryForPage(pageId);
-
   document.querySelectorAll('.category-card').forEach(card => {
-    card.classList.toggle('active', card.dataset.category === currentCategory);
+    card.classList.toggle('active', false);
   });
 
   document.querySelectorAll('.category-chip').forEach(chip => {
@@ -382,31 +407,78 @@ function updateCategoryNavigation(pageId) {
   });
 }
 
+function getTodayDateString() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getWeekStart(dateValue) {
+  const date = new Date(`${dateValue}T00:00:00`);
+  const diff = (date.getDay() + 6) % 7;
+  date.setDate(date.getDate() - diff);
+  return date.toISOString().slice(0, 10);
+}
+
+function isSameWeek(dateA, dateB) {
+  return getWeekStart(dateA) === getWeekStart(dateB);
+}
+
+function normalizeDailyRecord(record) {
+  if (!record || typeof record !== 'object') {
+    return null;
+  }
+
+  if (!record.date) {
+    return null;
+  }
+
+  return {
+    id: record.id || crypto.randomUUID(),
+    date: record.date,
+    math: String(record.math || ''),
+    english: String(record.english || ''),
+    social: String(record.social || ''),
+    science: String(record.science || ''),
+    korean: String(record.korean || ''),
+    todayStruggle: String(record.todayStruggle || ''),
+    tomorrowPlan: String(record.tomorrowPlan || ''),
+    parentMemo: String(record.parentMemo || ''),
+    createdAt: record.createdAt || new Date().toLocaleString('ko-KR')
+  };
+}
+
+function normalizeAcademyFeedback(entry) {
+  if (!entry || typeof entry !== 'object') {
+    return null;
+  }
+
+  return {
+    id: entry.id || crypto.randomUUID(),
+    date: entry.date || '',
+    readingFeedback: String(entry.readingFeedback || ''),
+    englishFeedback: String(entry.englishFeedback || ''),
+    mathFeedback: String(entry.mathFeedback || ''),
+    testScore: String(entry.testScore || ''),
+    homeworkMemo: String(entry.homeworkMemo || ''),
+    parentMemo: String(entry.parentMemo || '')
+  };
+}
+
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleData));
-    Object.assign(state, sampleData);
+    Object.assign(state, normalizeStudyData(sampleData));
     syncAnalyticsFromState();
     return;
   }
 
   try {
     const parsed = JSON.parse(raw);
-    Object.assign(state, {
-      todos: parsed.todos || [],
-      math: parsed.math || [],
-      english: parsed.english || [],
-      mistakes: parsed.mistakes || [],
-      ebs: parsed.ebs || [],
-      exams: parsed.exams || [],
-      report: parsed.report || {},
-      analytics: normalizeAnalyticsData(parsed.analytics)
-    });
+    Object.assign(state, normalizeStudyData(parsed));
     syncAnalyticsFromState();
   } catch (error) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleData));
-    Object.assign(state, sampleData);
+    Object.assign(state, normalizeStudyData(sampleData));
     syncAnalyticsFromState();
   }
 }
@@ -758,7 +830,12 @@ function normalizeStudyData(data) {
     math: Array.isArray(safe.math) ? safe.math : [],
     english: Array.isArray(safe.english) ? safe.english : [],
     mistakes: Array.isArray(safe.mistakes) ? safe.mistakes : [],
-    ebs: Array.isArray(safe.ebs) ? safe.ebs : [],
+    ebs: Array.isArray(safe.ebs)
+      ? safe.ebs.map(normalizeAcademyFeedback).filter(Boolean)
+      : [],
+    dailyRecords: Array.isArray(safe.dailyRecords)
+      ? safe.dailyRecords.map(normalizeDailyRecord).filter(Boolean)
+      : [],
     exams: Array.isArray(safe.exams) ? safe.exams : [],
     report: safe.report && typeof safe.report === 'object' ? safe.report : {},
     analytics: normalizeAnalyticsData(safe.analytics)
@@ -1010,79 +1087,60 @@ function renderCurrentLearningProfile() {
 }
 
 function renderDashboard() {
-  const todayDone = state.todos.filter(item => item.done).length;
-  const totalTodos = state.todos.length;
-  const todayProgress = totalTodos === 0 ? 0 : Math.round((todayDone / totalTodos) * 100);
-  const weakMath = state.math.filter(item => item.level === '낮음' || item.wrong >= 4);
-  const recentMistakes = [...state.mistakes].slice(0, 3);
+  const today = getTodayDateString();
+  const todayRecords = state.dailyRecords.filter(item => item.date === today);
+  const weekRecords = state.dailyRecords.filter(item => isSameWeek(item.date, today));
+  const recentStruggles = [...state.dailyRecords].reverse()
+    .map(item => item.todayStruggle)
+    .filter(Boolean)
+    .slice(0, 3);
 
-  document.getElementById('todayCount').textContent = `${totalTodos}개`;
-  document.getElementById('todayProgress').textContent = `${todayProgress}% 완료`;
-  document.getElementById('weekCount').textContent = `${state.todos.length}개`;
-  document.getElementById('weakCount').textContent = `${weakMath.length}개`;
-  document.getElementById('mistakeCount').textContent = `${state.mistakes.length}개`;
+  document.getElementById('todayCount').textContent = `${todayRecords.length}개`;
+  document.getElementById('weekCount').textContent = `${weekRecords.length}개`;
 
-  const weekTodoList = document.getElementById('weekTodoList');
-  weekTodoList.innerHTML = state.todos.length
-    ? state.todos.map(item => `
-      <div class="list-item">
-        <h4>${item.subject} · ${item.task}</h4>
-        <p>${item.memo || '메모 없음'}</p>
-        <span class="badge">${item.done ? '완료' : '진행 중'}</span>
-      </div>`).join('')
-    : '<div class="empty-state">이번 주 해야 할 일이 아직 없어요.</div>';
+  const difficultiesContainer = document.getElementById('recentDifficulties');
+  if (!difficultiesContainer) return;
 
-  const weakAreaList = document.getElementById('weakAreaList');
-  weakAreaList.innerHTML = weakMath.length
-    ? weakMath.map(item => `
-      <div class="list-item">
-        <h4>${item.topic}</h4>
-        <p>이해도: ${item.level}</p>
-        <p>틀린 문제: ${item.wrong}개</p>
-        <small>${item.memo}</small>
-      </div>`).join('')
-    : '<div class="empty-state">약한 단원이 아직 없어요.</div>';
+  if (!recentStruggles.length) {
+    difficultiesContainer.innerHTML = '<div class="mini-note">아직 어려웠던 내용이 없어요.</div>';
+    return;
+  }
 
-  const recentMistakesList = document.getElementById('recentMistakesList');
-  recentMistakesList.innerHTML = recentMistakes.length
-    ? recentMistakes.map(item => `
-      <div class="list-item">
-        <h4>${item.subject} · ${item.unit}</h4>
-        <p>${item.reason}</p>
-        <small>${item.retry}</small>
-      </div>`).join('')
-    : '<div class="empty-state">최근 오답이 아직 없어요.</div>';
+  difficultiesContainer.innerHTML = recentStruggles.map(item => `
+    <div class="mini-note">${item}</div>`).join('');
 
-  renderCurrentLearningProfile();
+  document.getElementById('todaySummary').textContent = todayRecords.length
+    ? `${todayRecords.length}개의 오늘 기록이 저장되어 있어요.`
+    : '오늘 기록을 먼저 남겨보세요.';
 }
 
 function renderToday() {
   const container = document.getElementById('todayList');
-  container.innerHTML = state.todos.length
-    ? state.todos.map(item => `
-      <div class="list-item todo-row">
-        <div>
-          <h4 class="${item.done ? 'done' : ''}">${item.subject} · ${item.task}</h4>
-          <p>${item.memo || '메모 없음'}</p>
-        </div>
-        <label class="todo-toggle">
-          <input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}" />
-          완료
-        </label>
-      </div>`).join('')
-    : '<div class="empty-state">오늘 할 일이 아직 없어요.</div>';
+  const status = document.getElementById('todayStatus');
 
-  container.querySelectorAll('input[type="checkbox"]').forEach(input => {
-    input.addEventListener('change', (event) => {
-      const target = state.todos.find(item => item.id === event.target.dataset.id);
-      if (target) {
-        target.done = event.target.checked;
-        saveData();
-        renderDashboard();
-        renderToday();
-      }
-    });
-  });
+  if (!container) return;
+
+  const records = [...state.dailyRecords].reverse();
+  container.innerHTML = records.length
+    ? records.map(record => `
+      <div class="list-item">
+        <h4>${record.date || '날짜 없음'}</h4>
+        <p><strong>수학</strong> ${record.math || '기록 없음'}</p>
+        <p><strong>영어</strong> ${record.english || '기록 없음'}</p>
+        <p><strong>사회</strong> ${record.social || '기록 없음'}</p>
+        <p><strong>과학</strong> ${record.science || '기록 없음'}</p>
+        <p><strong>국어 / 리드인</strong> ${record.korean || '기록 없음'}</p>
+        <p><strong>오늘 어려웠던 것</strong> ${record.todayStruggle || '기록 없음'}</p>
+        <p><strong>내일 다시 볼 것</strong> ${record.tomorrowPlan || '기록 없음'}</p>
+        <small>${record.parentMemo || '부모 메모 없음'}</small>
+      </div>`).join('')
+    : '<div class="empty-state">아직 저장된 오늘 공부 기록이 없어요.</div>';
+
+  if (status) {
+    status.textContent = records.length
+      ? `${records.length}개의 기록이 저장되어 있어요.`
+      : '오늘의 공부 기록을 저장하면 회의실에서 바로 참고할 수 있어요.';
+  }
 }
 
 function renderMath() {
@@ -1130,15 +1188,29 @@ function renderMistakes() {
 
 function renderEbs() {
   const container = document.getElementById('ebsList');
-  container.innerHTML = state.ebs.length
-    ? state.ebs.map(item => `
+  const status = document.getElementById('academyStatus');
+
+  if (!container) return;
+
+  const entries = [...state.ebs].reverse();
+  container.innerHTML = entries.length
+    ? entries.map(entry => `
       <div class="list-item">
-        <h4>${item.subject} · ${item.title}</h4>
-        <p>수강 여부: ${item.watched}</p>
-        <p>이해도: ${item.level}</p>
-        <p>복습 필요 여부: ${item.review}</p>
+        <h4>${entry.date || '날짜 없음'}</h4>
+        <p><strong>리드인 독서논술</strong> ${entry.readingFeedback || '피드백 없음'}</p>
+        <p><strong>영어학원</strong> ${entry.englishFeedback || '피드백 없음'}</p>
+        <p><strong>수학학원</strong> ${entry.mathFeedback || '피드백 없음'}</p>
+        <p><strong>테스트 점수</strong> ${entry.testScore || '미기록'}</p>
+        <p><strong>숙제 메모</strong> ${entry.homeworkMemo || '메모 없음'}</p>
+        <small>${entry.parentMemo || '부모 메모 없음'}</small>
       </div>`).join('')
-    : '<div class="empty-state">EBS 강의 기록이 아직 없어요.</div>';
+    : '<div class="empty-state">저장된 학원 피드백이 아직 없어요.</div>';
+
+  if (status) {
+    status.textContent = entries.length
+      ? `${entries.length}개의 피드백이 저장되어 있어요.`
+      : '피드백을 저장하면 AI 회의실에서 함께 요약해 드려요.';
+  }
 }
 
 function renderExams() {
@@ -1233,19 +1305,40 @@ function renderAnalysisDashboard() {
 }
 
 function bindForms() {
+  const todayDateInput = document.getElementById('dailyDate');
+  const academyDateInput = document.getElementById('academyDate');
+
+  if (todayDateInput && !todayDateInput.value) {
+    todayDateInput.value = getTodayDateString();
+  }
+
+  if (academyDateInput && !academyDateInput.value) {
+    academyDateInput.value = getTodayDateString();
+  }
+
   document.getElementById('todayForm').addEventListener('submit', (event) => {
     event.preventDefault();
-    state.todos.push({
+
+    state.dailyRecords.push({
       id: crypto.randomUUID(),
-      subject: document.getElementById('todoSubject').value.trim(),
-      task: document.getElementById('todoTask').value.trim(),
-      memo: document.getElementById('todoMemo').value.trim(),
-      done: false
+      date: document.getElementById('dailyDate').value || getTodayDateString(),
+      math: document.getElementById('dailyMath').value.trim(),
+      english: document.getElementById('dailyEnglish').value.trim(),
+      social: document.getElementById('dailySocial').value.trim(),
+      science: document.getElementById('dailyScience').value.trim(),
+      korean: document.getElementById('dailyKorean').value.trim(),
+      todayStruggle: document.getElementById('dailyStruggle').value.trim(),
+      tomorrowPlan: document.getElementById('dailyTomorrow').value.trim(),
+      parentMemo: document.getElementById('dailyParentMemo').value.trim(),
+      createdAt: new Date().toLocaleString('ko-KR')
     });
+
     saveData();
     renderToday();
     renderDashboard();
+    renderMeetingRoom();
     event.target.reset();
+    document.getElementById('dailyDate').value = getTodayDateString();
   });
 
   document.getElementById('mathForm').addEventListener('submit', (event) => {
@@ -1298,15 +1391,19 @@ function bindForms() {
     event.preventDefault();
     state.ebs.push({
       id: crypto.randomUUID(),
-      subject: document.getElementById('ebsSubject').value.trim(),
-      title: document.getElementById('ebsTitle').value.trim(),
-      watched: document.getElementById('ebsWatched').value,
-      level: document.getElementById('ebsLevel').value,
-      review: document.getElementById('ebsReview').value
+      date: document.getElementById('academyDate').value || getTodayDateString(),
+      readingFeedback: document.getElementById('readingFeedback').value.trim(),
+      englishFeedback: document.getElementById('englishFeedback').value.trim(),
+      mathFeedback: document.getElementById('mathFeedback').value.trim(),
+      testScore: document.getElementById('academyTestScore').value.trim(),
+      homeworkMemo: document.getElementById('homeworkMemo').value.trim(),
+      parentMemo: document.getElementById('academyParentMemo').value.trim()
     });
     saveData();
     renderEbs();
+    renderMeetingRoom();
     event.target.reset();
+    document.getElementById('academyDate').value = getTodayDateString();
   });
 
   document.getElementById('examForm').addEventListener('submit', (event) => {
@@ -1348,6 +1445,139 @@ function bindForms() {
       }
     });
   });
+}
+
+function bindMeetingHandlers() {
+  const generateBtn = document.getElementById('meetingGenerateBtn');
+  const openMeetingBtn = document.getElementById('openMeetingBtn');
+
+  if (openMeetingBtn) {
+    openMeetingBtn.addEventListener('click', () => switchPage('meeting-room'));
+  }
+
+  if (generateBtn) {
+    generateBtn.addEventListener('click', () => {
+      renderMeetingRoom();
+      const status = document.getElementById('meetingStatus');
+      if (status) {
+        status.textContent = '회의 요약이 새로 생성되었습니다.';
+      }
+    });
+  }
+}
+
+function renderMeetingRoom() {
+  const report = buildMeetingReport();
+  const strengths = document.getElementById('meetingStrengths');
+  const weaknesses = document.getElementById('meetingWeaknesses');
+  const improvement = document.getElementById('meetingImprovement');
+  const mathOpinion = document.getElementById('meetingMathOpinion');
+  const englishOpinion = document.getElementById('meetingEnglishOpinion');
+  const socialOpinion = document.getElementById('meetingSocialOpinion');
+  const scienceOpinion = document.getElementById('meetingScienceOpinion');
+  const koreanOpinion = document.getElementById('meetingKoreanOpinion');
+  const coachOpinion = document.getElementById('meetingCoachOpinion');
+  const planList = document.getElementById('meetingPlanList');
+  const historyList = document.getElementById('meetingHistoryList');
+
+  if (strengths) strengths.textContent = report.strengths.join(' ');
+  if (weaknesses) weaknesses.textContent = report.weaknesses.join(' ');
+  if (improvement) improvement.textContent = report.improvement;
+  if (mathOpinion) mathOpinion.textContent = report.comments.math;
+  if (englishOpinion) englishOpinion.textContent = report.comments.english;
+  if (socialOpinion) socialOpinion.textContent = report.comments.social;
+  if (scienceOpinion) scienceOpinion.textContent = report.comments.science;
+  if (koreanOpinion) koreanOpinion.textContent = report.comments.korean;
+  if (coachOpinion) coachOpinion.textContent = report.comments.coach;
+
+  if (planList) {
+    planList.innerHTML = report.plan.map(item => `<div class="meeting-plan-item">${item}</div>`).join('');
+  }
+
+  if (historyList) {
+    historyList.innerHTML = `
+      <div class="list-item">
+        <h4>${new Date().toLocaleDateString('ko-KR')} 회의</h4>
+        <p>${report.strengths[0] || '기록을 먼저 남겨 회의를 생성해 보세요.'}</p>
+      </div>`;
+  }
+}
+
+function buildMeetingReport() {
+  const records = getRecentDailyRecords(5);
+  const feedbacks = getRecentAcademyFeedbacks(5);
+  const latestRecord = records[0] || {};
+  const latestFeedback = feedbacks[0] || {};
+
+  const strengths = [];
+  if (records.length) strengths.push('오늘 공부 기록을 꾸준히 남기고 있어요.');
+  if (feedbacks.length) strengths.push('학원 피드백과 테스트 기록을 함께 정리해 두었어요.');
+  if (latestRecord.math || latestRecord.english || latestRecord.korean) {
+    strengths.push('과목별 기록이 있어서 회의실에서 더 구체적인 복습 순서를 잡을 수 있어요.');
+  }
+
+  const weaknesses = [];
+  if (latestRecord.todayStruggle) {
+    weaknesses.push(latestRecord.todayStruggle);
+  }
+  if (latestFeedback.readingFeedback) {
+    weaknesses.push(latestFeedback.readingFeedback);
+  }
+  if (latestFeedback.mathFeedback) {
+    weaknesses.push(latestFeedback.mathFeedback);
+  }
+  if (latestFeedback.englishFeedback) {
+    weaknesses.push(latestFeedback.englishFeedback);
+  }
+
+  if (!weaknesses.length) {
+    weaknesses.push('아직 어려웠던 내용이 없지만, 다음 기록에 짧게 남겨 두면 회의실이 더 정확해져요.');
+  }
+
+  const improvement = latestRecord.tomorrowPlan
+    ? `다음에는 ${latestRecord.tomorrowPlan}를 먼저 다시 보며 학습 흐름을 안정화해 보세요.`
+    : '내일 다시 볼 계획을 기록하면 회의실이 더 구체적인 추천을 만들어 드립니다.';
+
+  const plan = [
+    `월: ${latestRecord.math || '수학 개념 복습'} `,
+    `수: ${latestRecord.english || '영어 문장 연습'} `,
+    `금: ${latestRecord.korean || '독해 요약 연습'}`
+  ];
+
+  return {
+    strengths,
+    weaknesses,
+    improvement,
+    plan,
+    comments: {
+      math: latestRecord.math
+        ? `수학은 ${latestRecord.math}를 중심으로 다시 정리하고, 계산 과정을 한 줄씩 쓰는 연습을 추천합니다.`
+        : '수학은 기본 개념을 짧게 복습하고, 풀이 과정을 하나씩 적는 연습을 추천합니다.',
+      english: latestRecord.english
+        ? `영어는 ${latestRecord.english}를 복습하고, 문장 2개를 직접 써 보는 연습을 추천합니다.`
+        : '영어는 단어와 문장 구조를 짧게 반복하는 연습을 추천합니다.',
+      social: latestRecord.social
+        ? `사회는 ${latestRecord.social}를 중심으로 정리하고, 그림이나 지도와 연결해 말해 보세요.`
+        : '사회는 핵심 개념을 실생활 예시와 연결해 복습하면 좋아요.',
+      science: latestRecord.science
+        ? `과학은 ${latestRecord.science}를 중심으로 원리를 다시 정리하고, 예시를 떠올려 보세요.`
+        : '과학은 개념과 예시를 함께 연결해 이해하면 더 잘 기억됩니다.',
+      korean: latestRecord.korean
+        ? `국어/리드인은 ${latestRecord.korean}를 기준으로 핵심 문장과 요약을 다시 정리해 보세요.`
+        : '국어/리드인은 글의 핵심과 요약을 짧게 반복하는 연습을 추천합니다.',
+      coach: latestFeedback.testScore
+        ? `테스트 점수 ${latestFeedback.testScore}를 기준으로 다음 주에는 약한 영역을 먼저 복습하는 것을 추천합니다.`
+        : '저장된 피드백을 바탕으로 다음 주 우선순위를 정리해 보세요.'
+    }
+  };
+}
+
+function getRecentDailyRecords(limit = 5) {
+  return [...state.dailyRecords].reverse().slice(0, limit);
+}
+
+function getRecentAcademyFeedbacks(limit = 5) {
+  return [...state.ebs].reverse().slice(0, limit);
 }
 
 function tutorConfig(subject) {
